@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:file_picker/file_picker.dart';
 
 class profileScreen extends StatefulWidget {
   const profileScreen({Key? key}) : super(key: key);
@@ -20,7 +21,7 @@ class _profileScreenState extends State<profileScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchUserData(); 
+    _fetchUserData();
   }
 
   Future<void> _fetchUserData() async {
@@ -40,7 +41,7 @@ class _profileScreenState extends State<profileScreen> {
           name = userData['name'];
           email = userData['email'];
           image = userData['image'];
-          password = userData['password']; 
+          password = userData['password'];
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -63,6 +64,7 @@ class _profileScreenState extends State<profileScreen> {
         },
         body: jsonEncode(<String, String>{
           'name': name,
+          'imagem': image,
           'email': email,
           'password': password,
         }),
@@ -102,7 +104,6 @@ class _profileScreenState extends State<profileScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Conta deletada com sucesso!')),
         );
-        // Aqui você pode redirecionar para uma tela de login ou inicial
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Erro ao deletar conta')),
@@ -115,24 +116,85 @@ class _profileScreenState extends State<profileScreen> {
     }
   }
 
+  Future<String?> _selectImage() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.image,
+      );
+
+      if (result != null) {
+        final bytes = result.files.single.bytes;
+
+        if (bytes != null) {
+          return "data:image/png;base64,${base64Encode(bytes)}";
+        }
+      }
+      return null;
+    } catch (e) {
+      print("Erro ao selecionar imagem: $e");
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        centerTitle: true,
-        title: Text(
-          'Meu perfil',
-          style: TextStyle(fontSize: 36),
+        title: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: Icon(Icons.menu),
+              onPressed: () {
+              },
+              color: Color(0xFFC03A2B),
+              iconSize: 40,
+            ),
+            IconButton(
+              icon: Icon(Icons.home),
+              onPressed: () {
+              },
+              color: Color(0xFFC03A2B),
+              iconSize: 40,
+            ),
+            IconButton(
+              icon: Icon(Icons.person),
+              onPressed: () {
+              },
+              color: Color(0xFFC03A2B),
+              iconSize: 40,
+            ),
+          ],
         ),
       ),
       body: ListView(
         padding: EdgeInsets.all(20.0),
         children: [
           Center(
-            child: CircleAvatar(
-              radius: 70,
-              backgroundImage: NetworkImage(
-                  'LINK-DA-IMAGEM-DO-USUARIO'),
+            child: Stack(
+              alignment: Alignment.bottomRight,
+              children: [
+                CircleAvatar(
+                  radius: 70,
+                  backgroundImage: image.isNotEmpty
+                      ? NetworkImage(image)
+                      : AssetImage('LINK-IMAGEM-DO-PERFIL') as ImageProvider,
+                  child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: IconButton(
+                      icon: Icon(Icons.camera_alt, color: Colors.white),
+                      onPressed: () async {
+                        final newImage = await _selectImage();
+                        if (newImage != null) {
+                          setState(() {
+                            image = newImage;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
           SizedBox(height: 60),
@@ -149,7 +211,10 @@ class _profileScreenState extends State<profileScreen> {
                 children: [
                   TextFormField(
                     initialValue: name,
-                    decoration: InputDecoration(labelText: 'Nome'),
+                    decoration: InputDecoration(
+                      labelText: 'Nome',
+                      suffixIcon: Icon(Icons.person),
+                    ),
                     onChanged: (value) {
                       setState(() {
                         name = value;
@@ -159,7 +224,10 @@ class _profileScreenState extends State<profileScreen> {
                   SizedBox(height: 16),
                   TextFormField(
                     initialValue: email,
-                    decoration: InputDecoration(labelText: 'Email'),
+                    decoration: InputDecoration(
+                      labelText: 'Email',
+                      suffixIcon: Icon(Icons.email),
+                    ),
                     onChanged: (value) {
                       setState(() {
                         email = value;
@@ -169,7 +237,10 @@ class _profileScreenState extends State<profileScreen> {
                   SizedBox(height: 16),
                   TextFormField(
                     initialValue: password,
-                    decoration: InputDecoration(labelText: 'Senha'),
+                    decoration: InputDecoration(
+                      labelText: 'Senha',
+                      suffixIcon: Icon(Icons.lock),
+                    ),
                     obscureText: true,
                     onChanged: (value) {
                       setState(() {
@@ -193,24 +264,20 @@ class _profileScreenState extends State<profileScreen> {
             ),
           ),
           SizedBox(height: 16),
-
           Container(
-          margin: EdgeInsets.only(bottom: 20),
-          child: ElevatedButton(
-          
-            onPressed: _saveChanges,
-            child: Text('Salvar alterações', style: TextStyle(color: Colors.white)),
-            style: ElevatedButton.styleFrom(
-
-              backgroundColor: Color(0xFFC03A2B),
-              minimumSize: Size(250, 60),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+            margin: EdgeInsets.only(bottom: 20),
+            child: ElevatedButton(
+              onPressed: _saveChanges,
+              child: Text('Salvar alterações',
+                  style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFC03A2B),
+                minimumSize: Size(250, 60),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-              
             ),
-          ),
-
           ),
           ElevatedButton(
             onPressed: _deleteAccount,
