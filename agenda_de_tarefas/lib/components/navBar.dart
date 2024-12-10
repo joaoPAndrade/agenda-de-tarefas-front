@@ -1,4 +1,8 @@
+// ignore_for_file: camel_case_types
+
 import 'package:flutter/material.dart';
+import '../screens/profileScreen/profileScreen.dart';
+import '../main.dart';
 
 class navBar extends StatelessWidget implements PreferredSizeWidget {
   const navBar({Key? key}) : super(key: key);
@@ -10,24 +14,32 @@ class navBar extends StatelessWidget implements PreferredSizeWidget {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
-              icon: Icon(Icons.menu),
+              icon: const Icon(Icons.menu),
               onPressed: () {
               },
-              color: Color(0xFFC03A2B),
+              color: const Color(0xFFC03A2B),
               iconSize: 40,
             ),
             IconButton(
-              icon: Icon(Icons.home),
+              icon: const Icon(Icons.home),
               onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Menu',)),
+                );
               },
-              color: Color(0xFFC03A2B),
+              color: const Color(0xFFC03A2B),
               iconSize: 40,
             ),
             IconButton(
-              icon: Icon(Icons.person),
+              icon: const Icon(Icons.person),
               onPressed: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(builder: (context) => const profileScreen()),
+                );
               },
-              color: Color(0xFFC03A2B),
+              color: const Color(0xFFC03A2B),
               iconSize: 40,
             ),
           ],
@@ -36,5 +48,5 @@ class navBar extends StatelessWidget implements PreferredSizeWidget {
   }
 
   @override
-  Size get preferredSize => Size.fromHeight(kToolbarHeight);
+  Size get preferredSize => const Size.fromHeight(kToolbarHeight);
 }
