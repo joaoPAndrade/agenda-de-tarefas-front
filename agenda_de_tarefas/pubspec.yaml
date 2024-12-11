@@ -37,6 +37,9 @@ dependencies:
   cupertino_icons: ^1.0.8
   http: ^1.2.2
   file_picker: ^8.1.4
+  flutter_dotenv: ^5.2.1
+  shared_preferences: ^2.3.3
+
 
 dev_dependencies:
   flutter_test:
@@ -59,7 +62,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
-
+  assets: 
+    - lib/assets/tomate_calendario.png
+    - .env
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

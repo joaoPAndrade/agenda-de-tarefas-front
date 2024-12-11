@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../screens/profileScreen/profileScreen.dart';
 import '../main.dart';
+import '../screens/AgendaTarefasPage.dart';
 
 class navBar extends StatelessWidget implements PreferredSizeWidget {
   const navBar({Key? key}) : super(key: key);
@@ -25,7 +26,7 @@ class navBar extends StatelessWidget implements PreferredSizeWidget {
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => const MyHomePage(title: 'Menu',)),
+                  MaterialPageRoute(builder: (context) =>  AgendaTarefasPage()),
                 );
               },
               color: const Color(0xFFC03A2B),
