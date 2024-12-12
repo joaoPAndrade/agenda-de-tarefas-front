@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class profileScreen extends StatefulWidget {
   const profileScreen({Key? key}) : super(key: key);
@@ -13,12 +14,16 @@ class profileScreen extends StatefulWidget {
 }
 
 class _profileScreenState extends State<profileScreen> {
-  int id = 0;
+  int id = 1;
   String name = '';
   String email = '';
   String password = '';
   String image = '';
   bool notificationsEnabled = true;
+
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
 
   @override
   void initState() {
@@ -27,9 +32,11 @@ class _profileScreenState extends State<profileScreen> {
   }
 
   Future<void> _fetchUserData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? emailLocal = prefs.getString('email');
     try {
       final response = await http.get(
-        Uri.parse('LINK-DO-BACK-GET'),
+        Uri.parse('http://localhost:3333/user/email/$emailLocal'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
@@ -37,13 +44,14 @@ class _profileScreenState extends State<profileScreen> {
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> userData = json.decode(response.body);
-
         setState(() {
-          id = userData['id'];
-          name = userData['name'];
-          email = userData['email'];
-          image = userData['image'];
-          password = userData['password'];
+          _nameController.text = userData['user']['name'];
+          _emailController.text = userData['user']['email'];
+          _passwordController.text = userData['user']['senha'];
+          id = userData['user']['id'];
+          name = userData['user']['name'];
+          email = userData['user']['email'];
+          password = userData['user']['senha'];
         });
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -57,18 +65,17 @@ class _profileScreenState extends State<profileScreen> {
     }
   }
 
-  void _saveChanges() async {
+    void _saveChanges() async {
     try {
-      final response = await http.post(
-        Uri.parse('LINK-DO-BACK-UPDATE'),
+      final response = await http.put(
+        Uri.parse('http://localhost:3333/user/$id'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
           'name': name,
-          'imagem': image,
           'email': email,
-          'password': password,
+          'senha': password,
         }),
       );
 
@@ -91,14 +98,14 @@ class _profileScreenState extends State<profileScreen> {
   void _deleteAccount() async {
     try {
       final response = await http.delete(
-        Uri.parse('LINK-DO-BACK-DELETE'),
+        Uri.parse('http://localhost:3333/user/$id'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },
         body: jsonEncode(<String, String>{
-          'name': name,
+          'name':  name,
           'email': email,
-          'password': password,
+          'senha': password,
         }),
       );
 
@@ -147,6 +154,7 @@ class _profileScreenState extends State<profileScreen> {
             IconButton(
               icon: const Icon(Icons.menu),
               onPressed: () {
+                
               },
               color: const Color(0xFFC03A2B),
               iconSize: 40,
@@ -154,6 +162,7 @@ class _profileScreenState extends State<profileScreen> {
             IconButton(
               icon: const Icon(Icons.home),
               onPressed: () {
+
               },
               color: const Color(0xFFC03A2B),
               iconSize: 40,
@@ -161,6 +170,7 @@ class _profileScreenState extends State<profileScreen> {
             IconButton(
               icon: const Icon(Icons.person),
               onPressed: () {
+                
               },
               color: const Color(0xFFC03A2B),
               iconSize: 40,
@@ -179,7 +189,7 @@ class _profileScreenState extends State<profileScreen> {
                   radius: 70,
                   backgroundImage: image.isNotEmpty
                       ? NetworkImage(image)
-                      : const AssetImage('LINK-IMAGEM-DO-PERFIL') as ImageProvider,
+                      : null,
                   child: Align(
                     alignment: Alignment.bottomRight,
                     child: IconButton(
@@ -211,7 +221,7 @@ class _profileScreenState extends State<profileScreen> {
               child: Column(
                 children: [
                   TextFormField(
-                    initialValue: name,
+                    controller: _nameController,
                     decoration: const InputDecoration(
                       labelText: 'Nome',
                       suffixIcon: Icon(Icons.person),
@@ -224,7 +234,7 @@ class _profileScreenState extends State<profileScreen> {
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
-                    initialValue: email,
+                    controller: _emailController,
                     decoration: const InputDecoration(
                       labelText: 'Email',
                       suffixIcon: Icon(Icons.email),
@@ -237,7 +247,7 @@ class _profileScreenState extends State<profileScreen> {
                   ),
                   const SizedBox(height: 16),
                   TextFormField(
-                    initialValue: password,
+                    controller: _passwordController,
                     decoration: const InputDecoration(
                       labelText: 'Senha',
                       suffixIcon: Icon(Icons.lock),
