@@ -5,9 +5,8 @@ import '../../login_screen/login_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import '../../../models/user.dart';
 import 'dart:convert';
-import '../../AgendaTarefasPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../../home_tasks/home_tasks_page.dart';
 class UserRegistrationWidget extends StatefulWidget {
   const UserRegistrationWidget({Key? key}) : super(key: key);
 
@@ -76,7 +75,7 @@ class UserRegistrationWidgetState extends State<UserRegistrationWidget> {
         await prefs.setString('token', token);
         Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => AgendaTarefasPage()),
+        MaterialPageRoute(builder: (context) => HomeTasksPage()),
         );
 
 

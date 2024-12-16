@@ -5,6 +5,8 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../components/navBar.dart';
+import '../../components/sideBar.dart';
 
 class profileScreen extends StatefulWidget {
   const profileScreen({Key? key}) : super(key: key);
@@ -147,37 +149,8 @@ class _profileScreenState extends State<profileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () {
-                
-              },
-              color: const Color(0xFFC03A2B),
-              iconSize: 40,
-            ),
-            IconButton(
-              icon: const Icon(Icons.home),
-              onPressed: () {
-
-              },
-              color: const Color(0xFFC03A2B),
-              iconSize: 40,
-            ),
-            IconButton(
-              icon: const Icon(Icons.person),
-              onPressed: () {
-                
-              },
-              color: const Color(0xFFC03A2B),
-              iconSize: 40,
-            ),
-          ],
-        ),
-      ),
+      appBar:  navBar(),
+      drawer:  Sidebar(),
       body: ListView(
         padding: const EdgeInsets.all(20.0),
         children: [

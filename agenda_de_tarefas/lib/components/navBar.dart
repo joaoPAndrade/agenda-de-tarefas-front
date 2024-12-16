@@ -2,21 +2,21 @@
 
 import 'package:flutter/material.dart';
 import '../screens/profileScreen/profileScreen.dart';
-import '../main.dart';
-import '../screens/AgendaTarefasPage.dart';
-
+import '../screens/home_tasks/home_tasks_page.dart';
 class navBar extends StatelessWidget implements PreferredSizeWidget {
   const navBar({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return AppBar(
+      automaticallyImplyLeading: false,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             IconButton(
               icon: const Icon(Icons.menu),
               onPressed: () {
+                Scaffold.of(context).openDrawer();
               },
               color: const Color(0xFFC03A2B),
               iconSize: 40,
@@ -26,7 +26,7 @@ class navBar extends StatelessWidget implements PreferredSizeWidget {
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) =>  AgendaTarefasPage()),
+                  MaterialPageRoute(builder: (context) =>  HomeTasksPage()),
                 );
               },
               color: const Color(0xFFC03A2B),

@@ -6,7 +6,7 @@ import '../../user_registration/user_registration_page.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import '../../../screens/AgendaTarefasPage.dart';
+import '../../../screens/home_tasks/home_tasks_page.dart';
 
 class LoginWidget extends StatefulWidget {
   const LoginWidget({Key? key}) : super(key: key);
@@ -65,7 +65,7 @@ class LoginWidgetgetState extends State<LoginWidget> {
         await prefs.setString('token', token);
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => AgendaTarefasPage()),
+          MaterialPageRoute(builder: (context) => HomeTasksPage()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

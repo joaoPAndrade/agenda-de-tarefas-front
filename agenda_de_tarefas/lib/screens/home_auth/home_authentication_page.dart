@@ -3,7 +3,7 @@ import '../user_registration/user_registration_page.dart';
 import '../login_screen/login_page.dart';
 import 'dart:math'; // Import necessário para a função mock
 import 'package:shared_preferences/shared_preferences.dart';
-import '../AgendaTarefasPage.dart';
+import '../home_tasks/home_tasks_page.dart';
 class HomeAuthenticationPage extends StatefulWidget {
   const HomeAuthenticationPage({Key? key}) : super(key: key);
 
@@ -27,7 +27,7 @@ class _HomeAuthenticationPageState extends State<HomeAuthenticationPage> {
     if (token != null && token.isNotEmpty) {
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(builder: (context) => AgendaTarefasPage()),
+      MaterialPageRoute(builder: (context) => HomeTasksPage()),
     );
   } 
 
