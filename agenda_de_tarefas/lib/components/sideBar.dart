@@ -1,8 +1,43 @@
 import 'package:flutter/material.dart';
 import '../screens/groups/groups_page.dart';
+import '../screens/login_screen/login_page.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+
 
 class Sidebar extends StatelessWidget {
   const Sidebar({Key? key}) : super(key: key);
+
+  Future<void> logout(BuildContext context) async {
+    try {
+      // Remover as informações do SharedPreferences
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('email');
+      await prefs.remove('token');
+
+      // Fazer a requisição de logout para o backend
+      final response = await http.post(
+        Uri.parse('http://localhost:3333/logout'),
+        headers: {
+          'Authorization':
+              'Bearer ${prefs.getString('token')}',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => LoginPage()),
+        );
+      } else {
+        final responseBody = jsonDecode(response.body);
+        throw Exception('Erro no logout: ${responseBody['error']}');
+      }
+    } catch (e) {
+      print('Erro no logout: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -61,9 +96,9 @@ class Sidebar extends StatelessWidget {
                 ),
               ],
             ),
-            onTap: () {
-              print("0");
-            },
+            onTap:(){
+              logout(context);
+            } ,
           )
         ],
       ),
