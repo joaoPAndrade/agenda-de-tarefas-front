@@ -7,6 +7,7 @@ import '../../../models/user.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../home_tasks/home_tasks_page.dart';
+
 class UserRegistrationWidget extends StatefulWidget {
   const UserRegistrationWidget({Key? key}) : super(key: key);
 
@@ -18,6 +19,7 @@ class UserRegistrationWidgetState extends State<UserRegistrationWidget> {
   late TextEditingController nameController;
   late TextEditingController emailController;
   late TextEditingController passwordController;
+  late TextEditingController confirmPasswordController;
   bool _isObscured = true;
   final apiUrl = dotenv.env['API_URL'];
 
@@ -39,27 +41,30 @@ class UserRegistrationWidgetState extends State<UserRegistrationWidget> {
     if (!passwordRegex.hasMatch(passwordController.text)) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text(
-              "A senha deve conter pelo menos um caracter numérico, um caracter especial e pelo menos 8 dígitos")));
+              "A senha deve conter pelo menos um número, um caractere especial e no mínimo 8 caracteres")));
+      return;
+    }
+    if (passwordController.text != confirmPasswordController.text) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("As senhas não coincidem")));
       return;
     }
     const userPath = "user";
-    final  url = Uri.parse("$apiUrl$userPath");
+    final url = Uri.parse("$apiUrl$userPath");
     User newUser = User(
         name: nameController.text,
         email: emailController.text,
         senha: passwordController.text);
     try {
       final response = await http.post(
-        url,
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: json.encode(newUser.toJson())
-      );
-
-      if (response.statusCode == 201) {
+          url,
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: json.encode(newUser.toJson()));
       
-          final Map<String, dynamic> responseData = json.decode(response.body);
+      if (response.statusCode == 201) {
+        final Map<String, dynamic> responseData = json.decode(response.body);
         final String? email = responseData['user']['email'];
         final String? token = responseData['token'];
         
@@ -69,22 +74,19 @@ class UserRegistrationWidgetState extends State<UserRegistrationWidget> {
           );
           return;
         }
-
         final SharedPreferences prefs = await SharedPreferences.getInstance();
         await prefs.setString('email', email);
         await prefs.setString('token', token);
+        
         Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeTasksPage()),
+          context,
+          MaterialPageRoute(builder: (context) => HomeTasksPage()),
         );
-
-
-
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Erro ao registrar usuário")),
-      );
-    }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Erro ao registrar usuário")),
+        );
+      }
     } catch (e) {
       print(e);
     }
@@ -93,9 +95,10 @@ class UserRegistrationWidgetState extends State<UserRegistrationWidget> {
   @override
   void initState() {
     super.initState();
-    nameController = TextEditingController(text: '');
-    emailController = TextEditingController(text: '');
-    passwordController = TextEditingController(text: '');
+    nameController = TextEditingController();
+    emailController = TextEditingController();
+    passwordController = TextEditingController();
+    confirmPasswordController = TextEditingController();
   }
 
   @override
@@ -103,6 +106,7 @@ class UserRegistrationWidgetState extends State<UserRegistrationWidget> {
     nameController.dispose();
     emailController.dispose();
     passwordController.dispose();
+    confirmPasswordController.dispose();
     super.dispose();
   }
 
@@ -110,7 +114,7 @@ class UserRegistrationWidgetState extends State<UserRegistrationWidget> {
   Widget build(BuildContext context) {
     return Center(
       child: Container(
-        height: 330, 
+        height: 370,
         width: double.infinity,
         padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
@@ -152,14 +156,29 @@ class UserRegistrationWidgetState extends State<UserRegistrationWidget> {
                       },
                     ),
                   ),
-                  keyboardType: TextInputType.visiblePassword,
+                  obscureText: _isObscured,
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: confirmPasswordController,
+                  decoration: InputDecoration(
+                    labelText: 'Confirme sua senha',
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _isObscured ? Icons.visibility : Icons.visibility_off,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _isObscured = !_isObscured;
+                        });
+                      },
+                    ),
+                  ),
                   obscureText: _isObscured,
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
-                  onPressed: () {
-                    createUser();
-                  },
+                  onPressed: createUser,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFC03A2B),
                     padding: const EdgeInsets.symmetric(
@@ -173,31 +192,6 @@ class UserRegistrationWidgetState extends State<UserRegistrationWidget> {
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
-                  ),
-                ),
-                const SizedBox(height: 14),
-                RichText(
-                  text: TextSpan(
-                    text: 'Já tem uma conta?',
-                    style:
-                        const TextStyle(color: Color(0x41415080), fontSize: 16),
-                    children: [
-                      TextSpan(
-                        text: ' Faça login!',
-                        style: const TextStyle(
-                          color: Color(0xFFC03A2B),
-                          decoration: TextDecoration.underline,
-                        ),
-                        recognizer: TapGestureRecognizer()
-                          ..onTap = () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => LoginPage()),
-                            );
-                          },
-                      ),
-                    ],
                   ),
                 ),
               ],

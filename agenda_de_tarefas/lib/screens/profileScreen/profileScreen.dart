@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -7,6 +5,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../components/navBar.dart';
 import '../../components/sideBar.dart';
+import '../user_registration/user_registration_page.dart';
 
 class profileScreen extends StatefulWidget {
   const profileScreen({Key? key}) : super(key: key);
@@ -67,63 +66,157 @@ class _profileScreenState extends State<profileScreen> {
     }
   }
 
-    void _saveChanges() async {
-    try {
-      final response = await http.put(
-        Uri.parse('http://localhost:3333/user/$id'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'name': name,
-          'email': email,
-          'senha': password,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Perfil atualizado com sucesso!')),
+  void _saveChanges() async {
+    bool? shouldUpdate = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFFF8DDCE),
+          title: const Text(
+            'Confirmar atualização',
+            style: TextStyle(color: Colors.black),
+          ),
+          content: const Text(
+            'Você tem certeza que deseja atualizar o usuário?',
+            style: TextStyle(color: Colors.black),
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFC03A2B),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: Color(0xFFF8DDCE)),
+              ),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFC03A2B),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text(
+                'Confirmar',
+                style: TextStyle(color: Color(0xFFF8DDCE)),
+              ),
+            ),
+          ],
         );
-      } else {
+      },
+    );
+
+    if (shouldUpdate == true) {
+      try {
+        final response = await http.put(
+          Uri.parse('http://localhost:3333/user/$id'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            'name': name,
+            'email': email,
+            'senha': password,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Perfil atualizado com sucesso!')),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Erro ao atualizar perfil')),
+          );
+        }
+      } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erro ao atualizar perfil')),
+          SnackBar(content: Text('Erro: $e')),
         );
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro: $e')),
-      );
     }
   }
 
   void _deleteAccount() async {
-    try {
-      final response = await http.delete(
-        Uri.parse('http://localhost:3333/user/$id'),
-        headers: <String, String>{
-          'Content-Type': 'application/json; charset=UTF-8',
-        },
-        body: jsonEncode(<String, String>{
-          'name':  name,
-          'email': email,
-          'senha': password,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Conta deletada com sucesso!')),
+    bool? shouldUpdate = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color(0xFFF8DDCE),
+          title: const Text(
+            'Confirmar remoção',
+            style: TextStyle(color: Colors.black),
+          ),
+          content: const Text(
+            'Você tem certeza que deseja deletar o usuário?',
+            style: TextStyle(color: Colors.black),
+          ),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFC03A2B),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text(
+                'Cancelar',
+                style: TextStyle(color: Color(0xFFF8DDCE)),
+              ),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: const Color(0xFFC03A2B),
+              ),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text(
+                'Confirmar',
+                style: TextStyle(color: Color(0xFFF8DDCE)),
+              ),
+            ),
+          ],
         );
-      } else {
+      },
+    );
+    if (shouldUpdate == true) {
+      try {
+        final response = await http.delete(
+          Uri.parse('http://localhost:3333/user/$id'),
+          headers: <String, String>{
+            'Content-Type': 'application/json; charset=UTF-8',
+          },
+          body: jsonEncode(<String, String>{
+            'name': name,
+            'email': email,
+            'senha': password,
+          }),
+        );
+
+        if (response.statusCode == 200) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Conta deletada com sucesso!')),
+          );
+          Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) =>  UserRegistrationPage()),
+          (Route<dynamic> route) => false,
+        );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Erro ao deletar conta')),
+          );
+        }
+      } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Erro ao deletar conta')),
+          SnackBar(content: Text('Erro: $e')),
         );
       }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erro: $e')),
-      );
     }
   }
 
@@ -149,8 +242,8 @@ class _profileScreenState extends State<profileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:  navBar(),
-      drawer:  Sidebar(),
+      appBar: navBar(),
+      drawer: Sidebar(),
       body: ListView(
         padding: const EdgeInsets.all(20.0),
         children: [
@@ -160,9 +253,8 @@ class _profileScreenState extends State<profileScreen> {
               children: [
                 CircleAvatar(
                   radius: 70,
-                  backgroundImage: image.isNotEmpty
-                      ? NetworkImage(image)
-                      : null,
+                  backgroundImage:
+                      image.isNotEmpty ? NetworkImage(image) : null,
                   child: Align(
                     alignment: Alignment.bottomRight,
                     child: IconButton(
@@ -208,6 +300,7 @@ class _profileScreenState extends State<profileScreen> {
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _emailController,
+                    readOnly: true,
                     decoration: const InputDecoration(
                       labelText: 'Email',
                       suffixIcon: Icon(Icons.email),
@@ -265,7 +358,8 @@ class _profileScreenState extends State<profileScreen> {
           ),
           ElevatedButton(
             onPressed: _deleteAccount,
-            child: const Text('Deletar Conta', style: TextStyle(color: Colors.white)),
+            child: const Text('Deletar Conta',
+                style: TextStyle(color: Colors.white)),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFFC03A2B),
               minimumSize: const Size(250, 60),
