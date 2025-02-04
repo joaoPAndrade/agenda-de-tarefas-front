@@ -96,18 +96,17 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
     final _emailController = TextEditingController();
     String? userName;
     bool isUserValid = false;
+    List<String> suggestedUsers = [];
 
     Future<void> fetchUserByEmail(String email, Function updateState) async {
       try {
         final response =
             await http.get(Uri.parse('$baseUrl/user/email/$email'));
-        
 
         if (response.statusCode == 200) {
           final user = json.decode(response.body);
           updateState(() {
-            userName = user['user']
-                ['name'];
+            userName = user['user']['name'];
             isUserValid = true;
           });
         } else {
@@ -121,6 +120,29 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
         updateState(() {
           userName = null;
           isUserValid = false;
+        });
+      }
+    }
+
+    Future<void> fetchSuggestedUsers(String name, Function updateState) async {
+      try {
+        final response =
+            await http.get(Uri.parse('$baseUrl/user/suggestions/$name'));
+
+        if (response.statusCode == 200) {
+          final data = json.decode(response.body);
+          updateState(() {
+            suggestedUsers = List<String>.from(data['suggestions']);
+          });
+        } else {
+          updateState(() {
+            suggestedUsers = [];
+          });
+        }
+      } catch (e) {
+        print('Erro ao buscar sugestões: $e');
+        updateState(() {
+          suggestedUsers = [];
         });
       }
     }
@@ -141,24 +163,34 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
-                      controller: _emailController,
                       decoration: const InputDecoration(
-                        labelText: 'Email do Usuário',
+                        labelText: 'Nome do Usuário',
                         border: OutlineInputBorder(),
                       ),
-                      onChanged: (email) {
-                        if (email.isNotEmpty && email.contains('@')) {
-                          fetchUserByEmail(email, setState);
+                      onChanged: (name) {
+                        if (name.isNotEmpty) {
+                          fetchSuggestedUsers(name, setState);
                         }
                       },
                     ),
                     const SizedBox(height: 10),
-                    if (userName != null)
-                      Text('Usuário Encontrado: $userName',
-                          style: TextStyle(color: Colors.black)),
-                    if (userName == null && _emailController.text.isNotEmpty)
-                      const Text('Usuário não encontrado',
-                          style: TextStyle(color: Colors.red)),
+                    if (suggestedUsers.isNotEmpty)
+                      Container(
+                        height: 100,
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: suggestedUsers.length,
+                          itemBuilder: (context, index) {
+                            return ListTile(
+                              title: Text(suggestedUsers[index]),
+                              onTap: () {
+                                _emailController.text = suggestedUsers[index];
+                                fetchUserByEmail(suggestedUsers[index], setState);
+                              },
+                            );
+                          },
+                        ),
+                      ),
                   ],
                 ),
                 actions: <Widget>[
@@ -214,6 +246,7 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
         },
       );
     }
+
     showAddMemberDialog();
   }
 
