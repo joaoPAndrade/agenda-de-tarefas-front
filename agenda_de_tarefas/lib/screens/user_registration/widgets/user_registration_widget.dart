@@ -65,22 +65,10 @@ class UserRegistrationWidgetState extends State<UserRegistrationWidget> {
       
       if (response.statusCode == 201) {
         final Map<String, dynamic> responseData = json.decode(response.body);
-        final String? email = responseData['user']['email'];
-        final String? token = responseData['token'];
-        
-        if (email == null || token == null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Erro: E-mail ou JWT não encontrados")),
-          );
-          return;
-        }
-        final SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString('email', email);
-        await prefs.setString('token', token);
-        
+
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => HomeTasksPage()),
+          MaterialPageRoute(builder: (context) => LoginPage()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -192,6 +180,31 @@ class UserRegistrationWidgetState extends State<UserRegistrationWidget> {
                         color: Colors.white,
                         fontSize: 18,
                         fontWeight: FontWeight.bold),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                RichText(
+                  text: TextSpan(
+                    text: 'Já tem uma conta?',
+                    style:
+                        const TextStyle(color: Color(0x41415080), fontSize: 16),
+                    children: [
+                      TextSpan(
+                        text: 'Faça login!',
+                        style: const TextStyle(
+                          color: Color(0xFFC03A2B),
+                          decoration: TextDecoration.underline,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => LoginPage()),
+                            );
+                          },
+                      ),
+                    ],
                   ),
                 ),
               ],

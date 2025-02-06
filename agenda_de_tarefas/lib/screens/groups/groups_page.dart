@@ -212,7 +212,7 @@ class _GroupsPageState extends State<GroupsPage> {
         ),
       ),
     );
-
+    print("Voltei aqui");
     if (shouldReload) {
       setState(() {
         fetchGroups(emailLocal);

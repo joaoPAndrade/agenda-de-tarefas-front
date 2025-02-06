@@ -22,6 +22,22 @@ class GroupsDetailsPage extends StatefulWidget {
   _GroupsDetailsStatus createState() => _GroupsDetailsStatus();
 }
 
+class Users {
+  final int id;
+  final String name;
+  final String email;
+
+  Users({required this.id, required this.name, required this.email});
+
+  factory Users.fromJson(Map<String, dynamic> json) {
+    return Users(
+      id: json['id'],
+      name: json['name'],
+      email: json['email'],
+    );
+  }
+}
+
 class Participants {
   final String name;
   final String email;
@@ -58,7 +74,6 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
       final response = await http.get(Uri.parse('$baseUrl/group'));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        
       } else {
         print('Erro ao buscar grupos: ${response.statusCode}');
       }
@@ -73,13 +88,15 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
           await http.get(Uri.parse('$baseUrl/group/participants/$groupId'));
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        
+
         List<Participants> fetchedMembers = [];
         for (var participant in data['participants']) {
-          fetchedMembers.add(Participants(
-            name: participant['name'],
-            email: participant['email'],
-          ));
+          if(participant['email'] != emailLocal){
+            fetchedMembers.add(Participants(
+              name: participant['name'],
+              email: participant['email'],
+            ));
+          }
         }
         setState(() {
           members = fetchedMembers;
@@ -93,11 +110,11 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
   }
 
   Future<void> addMember(int groupId) async {
-    final _emailController = TextEditingController();
+    final nameController = TextEditingController();
     String? userName;
+    String? email;
     bool isUserValid = false;
-    List<String> suggestedUsers = [];
-
+    List<Users> suggestedUsers = [];
     Future<void> fetchUserByEmail(String email, Function updateState) async {
       try {
         final response =
@@ -125,15 +142,18 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
     }
 
     Future<void> fetchSuggestedUsers(String name, Function updateState) async {
+      int groupId = widget.id;
       try {
         final response =
-            await http.get(Uri.parse('$baseUrl/user/suggestions/$name'));
-
+            await http.get(Uri.parse('$baseUrl/users/search/$groupId/?name=$name'));
         if (response.statusCode == 200) {
           final data = json.decode(response.body);
-          updateState(() {
-            suggestedUsers = List<String>.from(data['suggestions']);
-          });
+          if (data['user'].isNotEmpty) {
+            updateState(() {
+              suggestedUsers = List<Users>.from(
+                  data['user'].map((user) => Users.fromJson(user)));
+            });
+          }
         } else {
           updateState(() {
             suggestedUsers = [];
@@ -163,32 +183,42 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
+                      controller: nameController,
                       decoration: const InputDecoration(
                         labelText: 'Nome do Usuário',
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (name) {
-                        if (name.isNotEmpty) {
+                        if (!isUserValid) {
+                          setState(() => isUserValid = false);
+                        }
+                        isUserValid = false;
+                        if (name.isNotEmpty && name.length % 3 == 0) {
                           fetchSuggestedUsers(name, setState);
+                        }
+                        if (suggestedUsers.isNotEmpty &&
+                            nameController.text == suggestedUsers[0].name &&
+                            suggestedUsers.length == 1) {
+                          email = suggestedUsers[0].email;
+                          setState(() => isUserValid = true);
                         }
                       },
                     ),
                     const SizedBox(height: 10),
                     if (suggestedUsers.isNotEmpty)
-                      Container(
-                        height: 100,
-                        child: ListView.builder(
-                          shrinkWrap: true,
-                          itemCount: suggestedUsers.length,
-                          itemBuilder: (context, index) {
-                            return ListTile(
-                              title: Text(suggestedUsers[index]),
-                              onTap: () {
-                                _emailController.text = suggestedUsers[index];
-                                fetchUserByEmail(suggestedUsers[index], setState);
-                              },
-                            );
-                          },
+                      SingleChildScrollView(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: suggestedUsers
+                              .map((user) => ListTile(
+                                    title: Text(user.name),
+                                    onTap: () {
+                                      nameController.text = user.name;
+                                      email = user.email;
+                                      setState(() => isUserValid = true);
+                                    },
+                                  ))
+                              .toList(),
                         ),
                       ),
                   ],
@@ -213,7 +243,6 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
                     ),
                     onPressed: isUserValid
                         ? () async {
-                            final email = _emailController.text;
                             try {
                               final response = await http.post(
                                 Uri.parse(
@@ -250,7 +279,7 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
     showAddMemberDialog();
   }
 
-  Future<void> removeMember(int groupId, String userEmail) async {
+  Future<bool> removeMember(int groupId, String userEmail) async {
     bool? shouldUpdate = await showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
@@ -294,7 +323,6 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
       },
     );
     if (shouldUpdate == true) {
-      
       try {
         final response = await http.delete(
           Uri.parse('http://localhost:3333/group/participants/$groupId'),
@@ -304,6 +332,7 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
 
         if (response.statusCode == 200) {
           fetchParticipants(widget.id);
+          return true;
         } else {
           print('Erro ao remover membro: ${response.body}');
         }
@@ -311,6 +340,7 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
         print('Erro ao remover membro: $e');
       }
     }
+    return false;
   }
 
   void deleteGroup(int groupId) async {
@@ -449,9 +479,7 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
   }
 
   Future<void> fetchUserByEmail(String email) async {
- 
-    final String baseUrl =
-        'http://localhost:3333';
+    final String baseUrl = 'http://localhost:3333';
     final url = Uri.parse('$baseUrl/user/email/$email');
 
     try {
@@ -514,7 +542,6 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
                     maxLength: 100,
                     keyboardType: TextInputType.multiline,
                   ),
-
                   const SizedBox(height: 16),
                   TextFormField(
                     controller: _ownerController,
@@ -583,6 +610,11 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
+                        participant.email == widget.owner?
+                        const Icon(
+                          Icons.emoji_events,
+                          color: Colors.black,
+                        ):
                         const Icon(
                           Icons.person,
                           color: Colors.black,
@@ -621,12 +653,26 @@ class _GroupsDetailsStatus extends State<GroupsDetailsPage> {
               },
               backgroundColor: const Color(0xFFC03A2B),
               child: const Icon(
-                Icons.add,
+                Icons.person_add_alt_1_sharp,
                 color: Color(0xFFF8DDCE),
-                size: 50,
+                size: 30,
               ),
             )
-          : null,
+          : FloatingActionButton(
+              onPressed: () async {
+                String email = emailLocal ?? "";
+                bool success = await removeMember(widget.id, email);
+                if (success) {
+                  Navigator.pop(context, true);
+                }
+              },
+              backgroundColor: const Color(0xFFC03A2B),
+              child: const Icon(
+                Icons.output,
+                color: Color(0xFFF8DDCE),
+                size: 30,
+              ),
+            ),
     );
   }
 }
