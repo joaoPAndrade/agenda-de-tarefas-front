@@ -4,7 +4,7 @@ import '../screens/login_screen/login_page.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-
+import '../screens/categories/categories_page.dart';
 
 class Sidebar extends StatelessWidget {
   const Sidebar({Key? key}) : super(key: key);
@@ -72,6 +72,26 @@ class Sidebar extends StatelessWidget {
               Navigator.pushReplacement(
                 context,
                 MaterialPageRoute(builder: (context) => GroupsPage()),
+              );
+            },
+          ),
+          
+
+          ListTile(
+            leading: const Icon(
+              Icons.category,
+              color: Colors.white,
+            ),
+            title: const Text(
+              "Categorias",
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => CategoryPage()),
               );
             },
           ),

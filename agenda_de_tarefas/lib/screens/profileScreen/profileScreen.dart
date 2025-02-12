@@ -141,6 +141,190 @@ class _profileScreenState extends State<profileScreen> {
     }
   }
 
+  void changePassword(BuildContext context) {
+    showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          bool _isObscured = true;
+          final TextEditingController oldPasswordController =
+              TextEditingController();
+          final TextEditingController newPasswordController =
+              TextEditingController();
+          final TextEditingController confirmPasswordController =
+              TextEditingController();
+          final _formKey = GlobalKey<FormState>();
+          return StatefulBuilder(builder: (context, setState) {
+            return AlertDialog(
+              title: const Text("Alterar Senha"),
+              backgroundColor: const Color(0xFFF8DDCE),
+              contentPadding: const EdgeInsets.all(16.0),
+              content: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      controller: oldPasswordController,
+                      obscureText: _isObscured,
+                      decoration: InputDecoration(
+                        labelText: 'Digite sua antiga senha',
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isObscured
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isObscured = !_isObscured;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    TextField(
+                      controller: newPasswordController,
+                      obscureText: _isObscured,
+                      decoration: InputDecoration(
+                        labelText: 'Digite sua nova senha',
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isObscured
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isObscured = !_isObscured;
+                            });
+                          },
+                        ),
+                      ),
+                    ),
+                    TextField(
+                      controller: confirmPasswordController,
+                      obscureText: _isObscured,
+                      decoration: InputDecoration(
+                        labelText: 'Confirme sua senha',
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            _isObscured
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              _isObscured = !_isObscured;
+                            });
+                          },
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+              actions: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: const Color(0xFFC03A2B),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: const Text(
+                        'Cancelar',
+                        style: TextStyle(color: Color(0xFFF8DDCE)),
+                      ),
+                    ),
+                    TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: const Color(0xFFC03A2B),
+                      ),
+                      onPressed: () async {
+                        if (!oldPasswordController.text.isNotEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text(
+                                      "A senha antiga deve ser inserida")));
+                          return;
+                        }
+                        final passwordRegex = RegExp(
+                            r'^(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}$');
+                        if (!passwordRegex
+                            .hasMatch(newPasswordController.text)) {
+                          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                              content: Text(
+                                  "A senha deve conter pelo menos um número, um caractere especial e no mínimo 8 caracteres")));
+                          return;
+                        }
+                        if (newPasswordController.text !=
+                            confirmPasswordController.text) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("As senhas não coincidem")));
+                          return;
+                        }
+                        bool isCorrect = await updatePassword(
+                            oldPasswordController.text,
+                            newPasswordController.text);
+                        if (isCorrect) {
+                          Navigator.pop(context);
+                        }
+                      },
+                      child: const Text(
+                        'Confirmar',
+                        style: TextStyle(color: Color(0xFFF8DDCE)),
+                      ),
+                    ),
+                  ],
+                )
+              ],
+            );
+          });
+        });
+  }
+
+  Future<bool> updatePassword(String oldPass, String newPass) async {
+    if (_passwordController.text != oldPass) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text("Senha incorreta")));
+      return false;
+    }
+
+    try {
+      final response = await http.put(
+        Uri.parse('http://localhost:3333/user/$id'),
+        headers: <String, String>{
+          'Content-Type': 'application/json; charset=UTF-8',
+        },
+        body: jsonEncode(<String, String>{
+          'name': _nameController.text,
+          'email': _emailController.text,
+          'senha': newPass,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('senha atualizada com sucesso!')),
+        );
+        return true;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Erro ao atualizar a senha')),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Erro: $e')),
+      );
+    }
+    return false;
+  }
+
   void _deleteAccount() async {
     bool? shouldUpdate = await showDialog<bool>(
       context: context,
@@ -203,10 +387,10 @@ class _profileScreenState extends State<profileScreen> {
             const SnackBar(content: Text('Conta deletada com sucesso!')),
           );
           Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) =>  UserRegistrationPage()),
-          (Route<dynamic> route) => false,
-        );
+            context,
+            MaterialPageRoute(builder: (context) => UserRegistrationPage()),
+            (Route<dynamic> route) => false,
+          );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Erro ao deletar conta')),
@@ -277,7 +461,7 @@ class _profileScreenState extends State<profileScreen> {
           Center(
             child: Container(
               width: 372,
-              height: 442,
+              height: 352,
               decoration: BoxDecoration(
                 color: const Color(0xFFF8DDCE),
                 borderRadius: BorderRadius.circular(10),
@@ -312,20 +496,6 @@ class _profileScreenState extends State<profileScreen> {
                     },
                   ),
                   const SizedBox(height: 16),
-                  TextFormField(
-                    controller: _passwordController,
-                    decoration: const InputDecoration(
-                      labelText: 'Senha',
-                      suffixIcon: Icon(Icons.lock),
-                    ),
-                    obscureText: true,
-                    onChanged: (value) {
-                      setState(() {
-                        password = value;
-                      });
-                    },
-                  ),
-                  const SizedBox(height: 16),
                   SwitchListTile(
                     title: const Text('Receber notificações'),
                     value: notificationsEnabled,
@@ -346,6 +516,23 @@ class _profileScreenState extends State<profileScreen> {
             child: ElevatedButton(
               onPressed: _saveChanges,
               child: const Text('Salvar alterações',
+                  style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFC03A2B),
+                minimumSize: const Size(250, 60),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+            ),
+          ),
+          Container(
+            margin: const EdgeInsets.only(bottom: 20),
+            child: ElevatedButton(
+              onPressed: () {
+                changePassword(context);
+              },
+              child: const Text('Alterar Senha',
                   style: TextStyle(color: Colors.white)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFFC03A2B),
