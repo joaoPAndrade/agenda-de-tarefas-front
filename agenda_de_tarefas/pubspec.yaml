@@ -39,6 +39,7 @@ dependencies:
   file_picker: ^8.1.4
   flutter_dotenv: ^5.2.1
   shared_preferences: ^2.3.3
+  table_calendar: ^3.2.0
 
 
 dev_dependencies:
