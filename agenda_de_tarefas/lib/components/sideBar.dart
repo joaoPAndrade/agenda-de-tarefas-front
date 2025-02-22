@@ -3,6 +3,7 @@ import '../screens/groups/groups_page.dart';
 import '../screens/login_screen/login_page.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:agenda_de_tarefas/screens/home_tasks/home_tasks_page.dart';
 import 'package:http/http.dart' as http;
 import '../screens/categories/categories_page.dart';
 
@@ -56,6 +57,24 @@ class Sidebar extends StatelessWidget {
               color: const Color.fromARGB(255, 255, 255, 255),
               iconSize: 40,
             ),
+          ),
+            ListTile(
+            leading: const Icon(
+              Icons.list,
+              color: Colors.white,
+            ),
+            title: const Text(
+              "Tarefas",
+              style:
+                  TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+            onTap: () {
+              Navigator.pop(context);
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (context) => HomeTasksPage()),
+              );
+            },
           ),
           ListTile(
             leading: const Icon(
@@ -116,9 +135,9 @@ class Sidebar extends StatelessWidget {
                 ),
               ],
             ),
-            onTap:(){
+            onTap: () {
               logout(context);
-            } ,
+            },
           )
         ],
       ),
