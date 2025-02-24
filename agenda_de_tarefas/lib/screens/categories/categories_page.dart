@@ -70,6 +70,18 @@ class _CreateCategoryDialogState extends State<CreateCategoryDialog> {
         ),
         ElevatedButton(
           onPressed: () {
+            bool isValid1 = RegExp(r'^[a-zA-Z0-9]+$').hasMatch(categoryName.text);
+            if(isValid1 == false){
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    "Erro: Nome da categoria inválido. Por favor, tente novamente.",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+              );
+              return;
+            }
             if (categoryName.text.isNotEmpty && emailLocal != null) {
               widget.onCreate(categoryName.text, emailLocal!);
               Navigator.of(context).pop();
@@ -173,6 +185,7 @@ class _CategoryPageState extends State<CategoryPage> {
                 key: _formKey,
                 child: TextFormField(
                   controller: nameController,
+                  maxLength: 10,
                   decoration: const InputDecoration(
                     labelText: 'Insira o novo nome da categoria',
                     border: OutlineInputBorder(),
@@ -337,7 +350,8 @@ class _CategoryPageState extends State<CategoryPage> {
                       mainAxisSize: MainAxisSize
                           .min, // Permite que os botões ocupem o mínimo de espaço necessário
                       children: [
-                        // Botão de Deletar
+                        category.ownerEmail == emailLocal
+                            ?
                         Container(
                           decoration: BoxDecoration(
                             color: const Color(0xFFC03A2B),
@@ -351,9 +365,11 @@ class _CategoryPageState extends State<CategoryPage> {
                             padding: const EdgeInsets.all(8),
                             constraints: const BoxConstraints(),
                           ),
-                        ),
+                        ) : const SizedBox.shrink() ,
                         const SizedBox(width: 8), // Espaço entre os botões
                         // Novo botão
+                        category.ownerEmail == emailLocal
+                            ?
                         Container(
                           decoration: BoxDecoration(
                             color: const Color(
@@ -370,7 +386,7 @@ class _CategoryPageState extends State<CategoryPage> {
                             padding: const EdgeInsets.all(8),
                             constraints: const BoxConstraints(),
                           ),
-                        ),
+                        ): const SizedBox.shrink(),
                       ],
                     ),
                     onTap: () => {

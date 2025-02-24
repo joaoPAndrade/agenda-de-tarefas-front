@@ -10,7 +10,7 @@ class TaskService {
   final String baseUrl = 'http://localhost:3333';
   Future<List<TaskResponse>> getTasksByDay(
       DateTime dateTime, String email) async {
-  print("Dia buscado: $dateTime");
+ // print("Dia buscado: $dateTime");
     final response = await http.put(
       Uri.parse('$baseUrl/task/day'),
       headers: {'Content-Type': 'application/json'},
@@ -23,7 +23,7 @@ class TaskService {
 
       // Acessando a lista correta dentro do JSON retornado
       List<dynamic> tasks = jsonData['tasksWithDetails'] ?? [];
-
+      print(tasks);
       return tasks.map((e) => TaskResponse.fromJson(e)).toList();
     } else {
       throw Exception('Erro ao buscar tarefas do dia');

@@ -83,6 +83,16 @@ class _CreateGroupDialogState extends State<CreateGroupDialog> {
         ),
         ElevatedButton(
           onPressed: () {
+            if( !RegExp(r'^[a-zA-Z0-9]+$').hasMatch(_groupNameController.text)  || !RegExp(r'^[a-zA-Z0-9]+$').hasMatch(_groupDescriptionController.text)){
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    "Erro: Nome do grupo não pode conter espaços ou caracteres especiais.",
+                  ),
+                ),
+              );
+              return;
+            }
             if (_groupNameController.text.isNotEmpty && emailLocal != null) {
               widget.onCreate(
                 _groupNameController.text,

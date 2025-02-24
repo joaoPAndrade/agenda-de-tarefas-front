@@ -116,6 +116,7 @@ void _loadUserEmailAndFetchData() async {
       return;
     }
     if(selectedCategory == null || selectedGroup == null || selectedValue == null || selectedTime == null || _selectedDate == null){
+      print("FALTA COISA");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text("Preencha todos os campos"),
@@ -142,7 +143,7 @@ Task newTask = Task(
     ownerEmail: ownerEmail!,
     title: titleController.text,
     description: descriptionController.text,
-    dateTask: _selectedDate!,
+    dateTask:  DateTime(_selectedDate!.year, _selectedDate!.month, _selectedDate!.day, selectedTime!.hour, selectedTime!.minute),
     isRecurrent: false,
     priority:  Priority.values.byName(selectedValue!) ,
     status: Status.TODO,
@@ -506,7 +507,7 @@ try {
 
               Container(
                  height: 33, 
-                 width: 120,
+                 width: 150,
 
   decoration: BoxDecoration(
     border: Border.all(color: Colors.white, width: 2),  // Borda branca de 2px
@@ -553,7 +554,7 @@ try {
 
 Container(
                  height: 33, 
-                 width: 120,
+                 width: 150,
 
   decoration: BoxDecoration(
     border: Border.all(color: Colors.white, width: 2),  // Borda branca de 2px

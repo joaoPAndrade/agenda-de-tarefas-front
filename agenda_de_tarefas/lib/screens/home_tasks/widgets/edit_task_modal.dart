@@ -84,12 +84,11 @@ class _EditTaskWidgetState extends State<EditTaskWidget> {
       (category) => category.id == selectedCategory?.id,
       orElse: () => Category(id: 0, name: "", ownerEmail: ""),
     );
-
+    
     setState(() {
       // Atualiza as listas de grupos e categorias
       groups = fetchedGroups;
       categories = fetchedCategories;
-
       // Atualiza os valores de selectedGroup e selectedCategory com os encontrados
       selectedGroup =  matchingGroup;
       selectedCategory =matchingCategory;
@@ -682,7 +681,7 @@ void edit(TaskResponse task) async {
 
               Container(
                  height: 33, 
-                 width: 120,
+                 width: 150,
 
   decoration: BoxDecoration(
     border: Border.all(color: Colors.white, width: 2),  // Borda branca de 2px
@@ -729,7 +728,7 @@ void edit(TaskResponse task) async {
 
 Container(
                  height: 33, 
-                 width: 120,
+                 width: 150,
 
   decoration: BoxDecoration(
     border: Border.all(color: Colors.white, width: 2),  // Borda branca de 2px

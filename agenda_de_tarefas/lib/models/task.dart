@@ -109,6 +109,7 @@ class Task {
 
 
   Map<String, dynamic> toJsonUpdate() {
+
     return {
       'ownerEmail': ownerEmail,
       'title': title,
@@ -117,8 +118,8 @@ class Task {
       'isRecurrent': isRecurrent,
       'priority': priority.name,  
       'status': status.name,
-      'groupId': groupId,
-      'categoryId': categoryId,
+      'groupId': groupId == 0? null : groupId,
+      'categoryId': categoryId == 0? null : categoryId,
     };
   }
   Map<String, dynamic> toJsonCreate() {

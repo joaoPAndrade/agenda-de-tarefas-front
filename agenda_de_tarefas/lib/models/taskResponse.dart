@@ -50,10 +50,10 @@ class TaskResponse {
       isRecurrent: json['isRecurrent'],
       priority: Priority.fromString(json['priority']),
       status: Status.fromString(json['status']),
-      groupId: json['groupId'],
-      categoryId: json['categoryId'],
-      groupName: json['groupName'],
-      categoryName: json['categoryName'],
+      groupId: json['groupId'] ?? 0,
+      categoryId: json['categoryId'] ?? 0,
+      groupName: json['groupName'] ?? "Sem Grupo",
+      categoryName: json['categoryName'] ?? "Sem Categoria",
     );
   }
 
