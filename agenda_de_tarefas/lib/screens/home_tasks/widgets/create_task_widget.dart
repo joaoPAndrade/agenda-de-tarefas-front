@@ -125,17 +125,6 @@ void _loadUserEmailAndFetchData() async {
       return;
       
     }
-    print(titleController.text);
-    print(descriptionController.text);
-    print(_selectedDate);
-    print(selectedTime);
-    print(selectedValue);
-    print(selectedCategory!.name);
-    print(selectedGroup!.name);
-
-
-
-
 
 Task newTask = Task(
     id: 0,
@@ -157,7 +146,6 @@ Task newTask = Task(
 
 
 try {
-  print("Criando");
     await service.createTask(newTask);
 
     // Mostrar sucesso

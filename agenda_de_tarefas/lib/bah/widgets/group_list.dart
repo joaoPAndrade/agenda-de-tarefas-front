@@ -15,7 +15,6 @@ class group_list extends StatelessWidget {
   }) : super(key: key);
 
   void goToPageGroup() {
-    print("Botão pressionado");
   }
 
   @override

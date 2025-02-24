@@ -146,20 +146,13 @@ void _loadUserEmailAndFetchData() async {
       );
       return;
     }
-    print(titleController.text);
-    print(descriptionController.text);
-    print(_selectedDate);
-    print(selectedTime);
-    print(selectedValue);
     Navigator.pop(context);
   }
 
   void remove(int id) async {
-    print("Removendo tarefa ");
 
    try {
       await     service.deleteTask(id);
-      print("Tarefa Removida com sucesso!");
 
       if (mounted) {
     Navigator.pop(context);

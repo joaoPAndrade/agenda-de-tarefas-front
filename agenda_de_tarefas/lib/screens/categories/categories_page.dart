@@ -108,7 +108,6 @@ class _CategoryPageState extends State<CategoryPage> {
   }
 
   Future<void> fetchCategories(String? email) async {
-    print(email);
     setState(() => isLoading = true);
     try {
       final response = await http.get(

@@ -83,7 +83,6 @@ class TaskListWidgetState extends State<TaskListWidget> {
       return;
     }
 
-    print("Show Edit Modal ${task.groupName}");
       await showModalBottomSheet(
       context: context,
       isScrollControlled: true,

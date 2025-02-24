@@ -58,7 +58,6 @@ class TimerWidgetState extends State<TimerWidget> {
         _selectedDate2 = pickedDate;
       }
       if (_selectedDate1.isAfter(_selectedDate2)) {
-        print("HHERE");
         setState(() {
         timeSpentHours = '00';
         timeSpentMinutes = '00';
@@ -126,21 +125,6 @@ void _loadUserEmailAndFetchData() async {
     print("Nenhum e-mail encontrado na sessão.");
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
   void getTimeSpent(String email) async {
     int timeSpent = await fetchData(email);

@@ -149,8 +149,6 @@ class _GroupsPageState extends State<GroupsPage> {
 
   Future<void> createGroup(
       String name, String description, String email) async {
-    print(name);
-    print(description);
     try {
       final response = await http.post(
         Uri.parse('http://localhost:3333/group'),

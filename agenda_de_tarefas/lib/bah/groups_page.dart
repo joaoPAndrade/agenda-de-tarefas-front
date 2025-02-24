@@ -88,7 +88,6 @@ class _GroupsPageState extends State<GroupsPage> {
           )),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          print('Botão "+" clicado');
         },
         backgroundColor: const Color(0xFFC03A2B),
         child: const Icon(

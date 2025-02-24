@@ -10,7 +10,6 @@ class TaskService {
   final String baseUrl = 'http://localhost:3333';
   Future<List<TaskResponse>> getTasksByDay(
       DateTime dateTime, String email) async {
-  print("Dia buscado: $dateTime");
     final response = await http.put(
       Uri.parse('$baseUrl/task/day'),
       headers: {'Content-Type': 'application/json'},
@@ -31,7 +30,6 @@ class TaskService {
   }
 
   Future<void> createTask(Task task) async {
-    print(task.toJsonUpdate());
     final response = await http.post(
       Uri.parse('$baseUrl/task/'),
       headers: {'Content-Type': 'application/json'},
@@ -43,8 +41,6 @@ class TaskService {
   }
 
   Future<void> updateTask(Task task) async {
-    print("Update Task");
-    print(task.dateTask);
 
     final response = await http.put(
       Uri.parse('$baseUrl/task/${task.id}'),
@@ -105,7 +101,6 @@ class GroupService {
   final String baseUrl = 'http://localhost:3333';
 
   Future<List<Group>> getGroupsOwnedByUser(String email) async {
-    print(email);
     final response = await http.get(Uri.parse('$baseUrl/group/owned/$email'));
     if (response.statusCode == 200) {
       List<dynamic> jsonData = jsonDecode(response.body);

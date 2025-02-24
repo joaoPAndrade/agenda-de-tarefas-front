@@ -40,7 +40,6 @@ DateTime focusedDay = DateTime.now();
     setState(() {
       taskList = taskResponse.map((e) => e).toList();
     });
-    print(taskList.length);
   }
 
   /*  int selectedMonth = selectedDay.month;
