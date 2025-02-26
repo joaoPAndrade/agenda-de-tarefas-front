@@ -4,7 +4,8 @@ import 'dart:convert';
 import '../../components/navBar.dart';
 import '../../components/sideBar.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import '../report/reportScreen.dart';
+import '../../models/category.dart';
 class CategoryPage extends StatefulWidget {
   @override
   _CategoryPageState createState() => _CategoryPageState();
@@ -69,6 +70,18 @@ class _CreateCategoryDialogState extends State<CreateCategoryDialog> {
         ),
         ElevatedButton(
           onPressed: () {
+            bool isValid1 = RegExp(r'^[a-zA-Z0-9]+$').hasMatch(categoryName.text);
+            if(isValid1 == false){
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text(
+                    "Erro: Nome da categoria inválido. Por favor, tente novamente.",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+              );
+              return;
+            }
             if (categoryName.text.isNotEmpty && emailLocal != null) {
               widget.onCreate(categoryName.text, emailLocal!);
               Navigator.of(context).pop();
@@ -107,15 +120,16 @@ class _CategoryPageState extends State<CategoryPage> {
   }
 
   Future<void> fetchCategories(String? email) async {
+    print(email);
     setState(() => isLoading = true);
     try {
       final response = await http.get(
-        Uri.parse('http://localhost:3333/category/email?ownerEmail=$email'),
+        Uri.parse('http://localhost:3333/category/group?ownerEmail=$email'),
         headers: {'Content-Type': 'application/json'},
       );
       if (response.statusCode == 200) {
         final responseBody = json.decode(response.body);
-        final List<dynamic> categoryList = responseBody['category'];
+        final List<dynamic> categoryList = responseBody['categories'];
         setState(() {
           categories =
               categoryList.map((data) => Category.fromJson(data)).toList();
@@ -171,6 +185,7 @@ class _CategoryPageState extends State<CategoryPage> {
                 key: _formKey,
                 child: TextFormField(
                   controller: nameController,
+                  maxLength: 10,
                   decoration: const InputDecoration(
                     labelText: 'Insira o novo nome da categoria',
                     border: OutlineInputBorder(),
@@ -292,28 +307,26 @@ class _CategoryPageState extends State<CategoryPage> {
         );
       },
     );
-   if(shouldUpdate == true){
-    final url = Uri.parse('http://localhost:3333/category/${category.id}');
+    if (shouldUpdate == true) {
+      final url = Uri.parse('http://localhost:3333/category/${category.id}');
 
-    final response = await http.delete(
-      url,
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({'ownerEmail': category.ownerEmail}),
-    );
+      final response = await http.delete(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'ownerEmail': category.ownerEmail}),
+      );
 
-    if (response.statusCode == 204) {
-      
+      if (response.statusCode == 204) {
         fetchCategories(category.ownerEmail);
-      
-      return true;
-    } else {
-      debugPrint("Erro ao excluir categoria: ${response.body}");
-      return false;
-    }
-   } 
-  return false;
 
-}
+        return true;
+      } else {
+        debugPrint("Erro ao excluir categoria: ${response.body}");
+        return false;
+      }
+    }
+    return false;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -325,33 +338,63 @@ class _CategoryPageState extends State<CategoryPage> {
           : ListView.builder(
               itemCount: categories.length,
               itemBuilder: (context, index) {
-                final category = categories[index];
+                final Category category = categories[index];
                 return Card(
                   child: ListTile(
                     title: Text(category.name),
                     subtitle: Text(
-                        "Proprietário: ${category.ownerEmail == emailLocal ? "Você" : "Outro"}"),
+                        "Proprietário: ${category.ownerEmail == emailLocal ? "Dono" : "Participante"}"),
                     leading:
                         const Icon(Icons.category, color: Color(0xFFC03A2B)),
-                    trailing: Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFC03A2B),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: IconButton(
-                        onPressed: ()  {
-                           deleteCategory(category); }
-          
-                        ,
-                        icon: const Icon(Icons.delete, color: Colors.white),
-                        padding: const EdgeInsets.all(8),
-                        constraints: const BoxConstraints(),
-                      ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize
+                          .min, // Permite que os botões ocupem o mínimo de espaço necessário
+                      children: [
+                        category.ownerEmail == emailLocal
+                            ?
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFC03A2B),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: IconButton(
+                            onPressed: () {
+                              deleteCategory(category);
+                            },
+                            icon: const Icon(Icons.delete, color: Colors.white),
+                            padding: const EdgeInsets.all(8),
+                            constraints: const BoxConstraints(),
+                          ),
+                        ) : const SizedBox.shrink() ,
+                        const SizedBox(width: 8), // Espaço entre os botões
+                        // Novo botão
+                        category.ownerEmail == emailLocal
+                            ?
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(
+                                0xFF577A59), // Cor para o novo botão (verde, por exemplo)
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: IconButton(
+                            onPressed: () {
+                              // Ação do novo botão
+                              editCategory(context, category.id,
+                                  category.ownerEmail, category.name);
+                            },
+                            icon: const Icon(Icons.edit, color: Colors.white),
+                            padding: const EdgeInsets.all(8),
+                            constraints: const BoxConstraints(),
+                          ),
+                        ): const SizedBox.shrink(),
+                      ],
                     ),
                     onTap: () => {
-                      editCategory(context, category.id, category.ownerEmail,
-                          category.name)
-                        
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Reportscreen(category: category))),
+                      
                     },
                   ),
                 );
@@ -380,6 +423,8 @@ class _CategoryPageState extends State<CategoryPage> {
   }
 }
 
+
+/*
 class Category {
   int id;
   String name;
@@ -399,3 +444,4 @@ class Category {
     );
   }
 }
+*/
